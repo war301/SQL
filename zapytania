@@ -1,0 +1,561 @@
+mysql dodawanie klucza głównego do istniejącej tabeli
+
+ALTER TABLE tabela ADD PRIMARY KEY(kolumny klucza oddzielone przecinkiem);
+
+przykład
+ALTER TABLE mecze ADD PRIMARY KEY(IdGosp,Datamaeczu)
+
+Dodawanie klucza obcego.
+
+Klucz obcy najlepiej dodawać do istniejącej tabeli 
+Instrukcja:
+
+ALTER TABLE tabela_z_kluczem_obcym ADD CONSTRAINT nazwa_ograniczenia
+FOREIGN KEY(klucz_obcy) REFERENCES tabela_klucza_głównego(klucz_główny);
+
+przykład
+
+ALTER TABLE mecze ADD CONSTRAINT klucz_gospodarza 
+FOREIGN KEY(IdGosp) REFERENCES kluby(idklub);
+
+
+Znaczenie klucza obcego
+
+Jeżeli w tabeli jest ustawiony klucz obcy, wówczas do tej tabeli nie można wpisać wartości klucza obcego, która nie istnieje w tabeli klucza głównego.
+
+Usuwanie klucza głównego
+
+ALTER TABLE nazwa_tabeli DROP PRIMARY KEY;
+
+
+
+Usuwanie klucza obcego
+
+ALTER TABLE nazwa_tabeli DROP FOREIGN KEY nazwa_ograniczenia;
+
+Przykład.
+ALTER TABLE mecze DROP FOREIGN KEY klucz_gospodarza;
+
+Dodawanie usuwanie kolumny w tabeli.
+
+Dodawanie
+
+ALTER TABLE nazwa_tabeli 
+ADD COLUMN nazwa_kolumny typ ograniczenia
+
+Przykład
+ALTER TABLE kluby 
+ADD COLUMN adres VARCHAR(255);
+
+Usuwanie kolumny
+
+ALTER TABLE nazwa_tabeli 
+DROP COLUMN nazwa_kolumny;
+
+Zmiana definicji
+
+ALTER TABLE nazwa_tabeli 
+MODIFY  nazwa_kolumny typ ograniczenia
+
+Przykład
+ALTER TABLE zawodnicy 
+MODIFY  pesel VARCHAR(20);
+
+ALTER TABLE nazwa_tabeli 
+CHANGE  nazwa_kolumny nowa_nazwa typ ograniczenia
+
+Wstawianie danych do tabeli
+
+INSERT INTO nazwa_tabeli(kol1,kol2,...) VALUES
+(wart1,wart2,....),
+(wart1,wart2,....),
+...
+;
+
+INSERT INTO zawodnicy( Imie, Nazwisko, DataUrodz, wzrost, kraj, pesel )
+VALUES (
+'Stanisław', 'Drozda', '1966-12-11', 188, 'Polska', '12345678901')
+
+
+INSTRUKCJA SELECT
+
+Instrukcja SELECT służy do odczytania danych z bazy.
+
+Najprostsza wersja
+
+SELECT * FROM nazwa_tabeli;
+wyświetla wszsytkie dane tabeli.
+
+Przykład
+
+SELECT * FROM zawodnicy;
+
+MOżna wyświetlić tylko niektóre kolumny
+SELECT kol1,kol2,... FROM nazwa_tabeli;
+
+SELECT Imie,nazwisko,kraj FROM zawodnicy;
+
+Jeżeli chcemy uniknąć powtarzających się wierszy
+
+SELECT DISTINCT ....
+
+przykład chcemy wyświetlić listę krajów z których są zawodnicy
+
+SELECT DISTINCT kraj FROM zawodnicy;
+
+
+
+porządkowanie wierszy
+
+Aby uporządkować wiersze w wyniku zapytania na końcu dokładamy klauzulę ORDER BY nazwakol1,nazwakol2,.. kolejność kolumn ustawia hierarchię. Porządkowanie rosnące po nazwie kolumny ASC, malejące DESC,
+
+przykład porządkujemy zawodników wg nazwisk
+
+SELECT * FROM zawodnicy ORDER BY nazwisko;
+
+Przykład 
+porządkujemy zawodników od najmłodszego do najstarszego
+
+SELECT * FROM zwodnicy ORDER BY DataUrodz DESC
+
+Porządkujemy zawodników z poszczególnych krajów wg wzrostu od najwyzszego
+
+SELECT * FROM zawodnicy ORDER BY kraj,wzrost  DESC,nazwisko;
+
+Warunek WHERE pozwala na wybrtanie wirszy spełniających określony warunek
+
+SELECT ... FROM tabela WHERE warunek
+
+Warunek powinien przyjmować wartość prawda lub fałsz lub NULL
+
+przykład 
+zawodnicy z Anglii
+
+SELECT * FROM zawodnicy WHERE kraj = 'Anglia'
+
+przykład
+zawodnicy którzy urodzili się po 1 stycznia 1986
+
+SELECT Imie,nazwisko,DataUrodz FROM zawodnicy WHERE DataUrodz>'1985-01-01'
+
+klauzula BETWEEN 
+
+W warunku WHERE można użyc klauzuli BETWEEN aby sprawdzićczy wartść jakiejś kolumny (ew. wyrażenia zawiera się w określonym przedziale
+Dotyczy teskstów , liczb, daty
+
+Przykład
+Sprawdzamy  którzy zawodnicy urodzili się w roku 1985
+
+SELECT * FROM zawodnicy WHERE DataUrodz BETWEEN '1985-01-01' AND '1985-12-31'
+
+Przykład
+
+Sprawdzamy którzy zawodnicy mają wzrost między 185 i 195 cm
+
+SELECT * FROM zawodnicy WHERE wzrost BETWEEN 185 AND 195;
+
+
+szukamy wszystkich zawodników niepolskich
+
+SELECT * FROM zawodnicy WHERE kraj !='Polska'
+SELECT * FROM zawodnicy WHERE kraj <>'Polska'
+SELECT * FROM zawodnicy WHERE NOT (kraj ='Polska');
+
+Jeżeli chcemy sprawdzić czy pewna kolumna jest w zbiorze danych
+
+WHERE kolumna IN (wart1,wart2,wart3,...)
+
+sprawdzamy czy zawodnicy są z krajów Europy
+
+
+
+SELECT * FROM zawodnicy WHERE kraj IN ('Polska','Niemcy','Włochy','Belgia')
+
+SELECT * FROM zawodnicy WHERE kraj NOT IN ('Polska','Niemcy','Włochy','Belgia')
+
+porównywanie ze wzorcem
+
+where kolumna like '   '
+
+znak % we wzorcu zastępuje  dowolną liczbę znaków
+
+znak _ zastępuje jeden znak,
+
+przykład
+zawodnicy pochdzący z kraju na literę B
+
+pesel nie ma 11 znaków
+
+SELECT * FROM zawodnicy WHERE pesel NOT LIKE '___________'
+
+KLuby których nazwa miasta jest dwuczęściowa
+(wśrodku nazwy jest spacja)
+
+SELECT * FROM kluby WHERE miasto LIKE '% %'
+
+
+Klauzula IS NULL
+
+Tym warunkiem sprawdzamy czy wartość kolumny jest NULL (nie "= NULL")
+
+w tabeli zawklub jeżeli kontrakt zawodnika w klubie trwa w kolumnie dataZak występuje wartość NULL (brak daty zakończenia kontraktu)
+
+Wyświetlamy wszystkie niezakończone kontrakty
+
+SELECT * FROM zawklub WHERE DataZak IS NULL
+
+Aby wyświetlić zakończone kontrakty (określona data zakończenia kontraktu)
+
+SELECT * FROM zawklub WHERE DataZak IS NOT NULL
+
+
+W klauzuli WHERE mogą też wystąpić warunki WHERE połączone operatorami AND, OR lub może wystąpić operator zaprzeczenia NOT
+
+Wyświetlimy wszystkich zawodników wyższych niż 185 i pochodzących z Niemiec
+
+SELECT * FROM zawodnicy WHERE wzrost>185 AND kraj='Niemcy'
+
+Wyświetlimy zawodników z Belgii lub mających wzrost co najmniej  190 
+
+SELECT * FROM zawodnicy WHERE kraj ='Belgia' OR wzrost >=190
+
+
+
+Po instrukcji SELECT oprócz * i kolumn mogą wystąpić też funkcje lub wyrażenia.
+
+Przykład 
+Liczba bramek zdobytch w meczach 
+
+SELECT GoleGosp+GoleGosc,DataMeczu FROM mecze
+
+Kolumnom lub wyrażeniom występującym po SELECT można nadać nowe nazwy (tzw. aliasy) które bedą używane w zastępstwie nazw lub wyrażeń. Aliasy można użyć np. przy sortowaniu
+
+przykład
+
+SELECT GoleGosp+GoleGosc AS Gole_w_meczu,DataMeczu FROM mecze ORDER BY Gole_w_meczu
+
+przykład 
+Łączymy funkcją CONCAT imię i nazwisko zawodnika w jeden napis i nazywamy to zawodnik
+
+SELECT CONCAT(Imie,' ',nazwisko) AS zawodnik FROM zawodnicy ORDER BY nazwisko
+Użyta funkcja CONCAT łączy teksty oddzielone przecinkami
+
+przykład
+SELECT IdGosp,IdGosc ,IF(GoleGosp>GoleGosc,'zwycięstwo gospodarzy',
+IF(GoleGosp=GoleGosc,'remis','zwycięstwo gości')) FROM mecze
+
+użyta została funkcja IF(warunek,prawda,fałsz)
+
+Uzyskiwanie danych z wielu tabel
+
+Aby uzyskać dane z więcej niż jednej tabeli można połaczyć dane w klauzuli WHERE
+
+SELECT kol1,kol2 ... FROM tabela1, tabela2 WHERE tabela1.kolx=tabela2.koly
+
+Kolumny kolx i koly są najczęściej kluczem głównym i odpowiadającym kluczem obcym.
+
+Przykład
+Wyświetlimy zawodników którzy grają w klubach (Ich kontrakt nie został zakończony więc DataZak ma wartość NULL). Aby móc wyświetlić dane zawodnika konieczne jezt użycie tabeli zawodnicy, natomiast tabela zawklub daje informację czy kontrakt jest zakończony czy nie.
+
+SELECT Imie , Nazwisko,kraj FROM zawodnicy, zawklub WHERE zawodnicy.IdZaw=zawklub.IdZaw and DataZak IS NULL
+
+Można otrzymać dane więcej niż z dwóch tabel łącząc je podobnie jak dwie tabele
+
+SELECT ... FROM tabela1,tabela2,tabela3 WHERE tabela1.kolx=tabela2.koly AND Tabela1 (lub2).kolz=tabela3.kolt
+
+przykład 
+
+Wyświetlimy zawodników wraz z klubami w których aktualnie grają
+
+SELECT Imie,nazwisko,nazwa,miasto FROM zawodnicy,zawklub,kluby 
+WHERE zawodnicy.IdZaw=zawklub.IdZaw AND zawklub.IdKlubu=kluby.idklub AND DataZak IS NULL 
+
+Jeżeli łączymy tabele z pomoca instrukcji WHERE to po instrukcji WHERE 
+mamy instrukcje łączące tabele
+zawodnicy.IdZaw=zawklub.IdZaw AND zawklub.IdKlubu=kluby.idklub
+ ale także instrukcje które dotyczą warunków wyboru.
+DataZak IS NULL
+
+--------------------------------------10.12.2017------------------------------------------
+
+Łaczenie tabel z pomocą instrukcji INNER JOIN
+
+SELECT ...FROM Tabela1 INNER JOIN tabela2 ON tabela1.kol=tabela2.kol WHERE ...
+
+Przykład
+
+SELECT Imie,nazwisko,nazwa,miasto 
+FROM zawodnicy INNER JOIN zawklub ON zawodnicy.IdZaw=zawklub.IdZaw 
+INNER JOIN kluby ON zawklub.IdKlubu=kluby.idklub
+WHERE   DataZak IS NULL;
+
+
+Łączenie tabel instrukcją LEFT JOIN
+
+Przy zastosowaniu instrukcji łączenia LEFT JOIN zostaną wyświetlone wszystkie wiersze z  pierwszej tabeli
+oraz wiersze z drugiej tabeli które pasują do połączenia. 
+
+Przykład 
+
+SELECT Imie,nazwisko,nazwa,miasto 
+FROM zawodnicy LEFT JOIN zawklub ON zawodnicy.IdZaw=zawklub.IdZaw 
+LEFT JOIN kluby ON zawklub.IdKlubu=kluby.idklub
+WHERE   DataZak IS NULL;
+
+Łączenie tabel instrukcją RIGHT JOIN Działa tak jak LEFT JOIN tylko 
+wyświetla wszystkie wiersze z drugiej tabeli a z pierwszej tylko pasujące
+
+
+Jeżeli nazwy kolumn łączących w obu tabelach są jednakowe to można przy łączeniu INNER JOIN
+zamiast instrukcji ON użyc USING(nazwy kolumn łączących)
+
+SELECT Imie,nazwisko,nazwa,miasto 
+FROM zawodnicy INNER JOIN zawklub USING(IdZaw)
+INNER JOIN kluby ON zawklub.IdKlubu=kluby.idklub
+WHERE   DataZak IS NULL;
+
+
+Jeżeli nazwy kolumn łączących w obu tabelach są jednakowe Oraz w jednej tabeli jest to klucz głównyto można przy łączeniu INNER JOIN
+to możemy zapisać instrukcję NATURAL JOIN
+
+Przykład
+
+SELECT Imie,nazwisko,nazwa,miasto 
+FROM zawodnicy NATURAL JOIN zawklub 
+INNER JOIN kluby ON zawklub.IdKlubu=kluby.idklub
+WHERE   DataZak IS NULL;
+
+Użycie wielokrotne tabeli w zapytaniu. W takim przypadku nadajemy tabeli inną nazwę.
+
+FROM tabela nazwazastępcza
+
+
+SELECT DataMeczu,Gosp.nazwa,Gosp.miasto,Gosc.nazwa,Gosc.miasto,GoleGosp,':',GoleGosc 
+FROM Kluby Gosp INNER JOIN mecze ON Gosp.idklub=mecze.Gosp 
+INNER JOIN Kluby Gosc ON Gosc.idklub=mecze.Gosc ORDER BY DataMeczu, Gosp.nazwa;
+
+Funkcje agregujące.
+-------------------
+
+Funkcje agregujące są to funkcje których argumentami sa wiersze tabeli, 
+
+obliczają wartości na podstawie wielu wierszy.
+
+
+1. COUNT(*) Jest to funkcja zliczająca liczbę wierszy zapytania.
+
+Przykład
+
+SELECT COUNT(*) FROM kluby;
+
+Wynikiem tego zapytania  jest liczba klubów.
+
+COUNT(DISTINCT kol) Podaje liczbę różnych wartości w kolumnie kol.
+
+Przykład
+SELECT COUNT(DISTINCT miasto) FROM kluby;
+
+
+W wyniku otrzymamy liczbę miast w których sa kluby
+
+Przykład
+SELECT
+ COUNT(DISTINCT kraj) FROM zawodnicy;
+
+Otrzymamy liczbę krajów z których są zawodnicy.
+
+Przy użyciu funkcji COUNT() w zapytaniu po 
+SELECT nie występują kolumny a tylko ewentualnie inne funcje agregujące
+
+2. SUM(wyrażenia liczbowe) Ta funkcja oblicza sumę kolumny która jest argumentem
+
+SUM(nazwa) jest nieuprawnione
+
+Przykład
+
+SELECT SUM(GoleGosp) FROM mecze INNER JOIN kluby ON mecze.Gosp=kluby.idklub WHERE nazwa='Legia';
+
+Zapytanie liczy sumę bramek klubu Legia grającego jako gospodarz.
+
+3. AVG(wyrażenia liczbowe) oblicz średnią
+
+
+Przykład
+
+SELECT AVG(GoleGosp+GoleGosc) FROM mecze WHERE DataMeczu='2010-03-22';
+
+Przykład
+
+SELECT AVG(wzrost) FROM zawodnicy NATURAL JOIN zawklub 
+INNER JOIN kluby ONzawklub.IdKlubu=kluby.idklub
+WHERE nazwa='Rokita' ;
+
+4. STDDEV(wyrażenia liczbowe) liczy odchelenie standardowe
+
+Przykład
+
+SELECT AVG(wzrost),STDDEV(wzrost) FROM zawodnicy NATURAL JOIN zawklub 
+INNER JOIN kluby ONzawklub.IdKlubu=kluby.idklub
+WHERE nazwa='Rokita' ;
+
+5.MAX(wyrażenie w którym można ustalić kolejność),MIN()
+
+Przykład
+
+SELECT MAX(wzrost) FROM zawodnicy WHERE kraj !='Polska';
+
+Wzrost najwyższego zawodnika zagranicznego
+
+GROUP_CONCAT(wyrażenie tekstowe)
+
+Łączenie tekstów
+
+Przykład SELECT GROUP_CONCAT(CONCAT(imiona,' ',nazwisko)) FROM zawodnicy NATURAL JOIN zawklub 
+INNER JOIN kluby ONzawklub.IdKlubu=kluby.idklub
+WHERE nazwa='Rokita' ;
+
+W jednym wierszu zostaną wypisanie wszyscy zawodnicy.
+---------------------------------------16.12.2017--------------------------------------------------- 
+
+GRUPOWANIE WIERSZY .
+
+Dotychczas instrukcja SELECT albo wybierała wiersze ewentualnie przy użyciu funkcji agregujących wybierano wszystkie wiersze.
+Grupowanie wiersze pozwala wykonywać operacje na grupach wierszy według jakiegoś kryterium.
+
+Przykład
+
+Wybierzemy kraje z których są zawodnicy.
+SELECT DISTINCT kraj FROM Zawodnicy;
+Użycie DISTINCT eliminuje duplikaty.
+Ten sam rezultat można osiągnąć przy pomocy instrukcji
+SELECT kraj FROM zawodnicy GROUP BY kraj;
+Takie użycie instrukcji GRUP BY jest niecelowe, lepiej jest użyć w takim przypadku DISTINCT
+
+Grupowanie wierszy jest przydatne w przypadku użycia funkcji agregujacych. 
+Wtedy dla każdej grupy obliczana jest funkcja agregująca.
+PRZYKŁAD
+
+Obliczymy średni wzrost zawodników dla każdego kraju.
+
+SELECT kolumna_dla_FAGR,FAGR FROM tabela GROUP BY  kolumna_dla_FAGR;
+
+SELECT kraj,AVG(wzrost) FROM zawodnicy GROUP BY kraj;
+
+Brak GROUP BY przy użyciu funkcji agregującej razem z kolumną w niektórych systemach powoduje błąd w innych może przedstawiać nieoczekiwane wyniki.
+
+Jeżeli w zapytaniu występuje warunek WHERE to powinien się znajdować przed GRUOP BY.
+
+Ogólny schemat zapytanie z GROUP BY.
+
+SELECT kol,FAGR FROM tabele WHERE warunek GROUP BY kol ORDER BY …
+
+PRZYKŁAD
+
+Znajdziemy wzrost najwyższego polskiego zawodnika w każdym klubie uporządkowany malejąco.
+
+SELECT CONCAT(nazwa,' ',miasto),MAX(wzrost) FROM kluby INNER JOIN zawklub ON kluby.idklub=zawklub.IdKlubu INNER JOIN zawodnicy ON zawklub.IdZaw=zawodnicy.IdZaw WHERE kraj='Polska' GROUP BY idklub ORDER BY 2 DESC;
+
+
+
+zawodnicy aktualnie grajacy w klubach
+
+SELECT CONCAT(nazwa,' ',miasto),GROUP_CONCAT(CONCAT(Imiona,' ',nawisko)) FROM kluby INNER JOIN zawklub ON kluby.idklub=zawklub.IdKlubu INNER JOIN zawodnicy ON zawklub.IdZaw=zawodnicy.IdZaw WHERE DataZak IS NULL GROUP BY idklub ;
+
+Przykład
+
+W ilu klubach, i których gra lub grał zawodnik
+
+SELECT CONCAT(imiona,' ',nazwisko),COUNT(*),GROUP_CONCAT(CONCAT(nazwa,' ',miasto)) FROM kluby INNER JOIN zawklub ON kluby.idklub=zawklub.IdKlubu INNER JOIN zawodnicy ON zawklub.IdZaw=zawodnicy.IdZaw  GROUP BY IdZaw ORDER BY 2 ;
+
+
+Funkcji GROUP_CONCAT można użyc z opcją SEPARATOR co umożliwia użyci innego znaku rozdzielającego niż przecinek.
+
+np. GROUP_CONCAT(CONCAT(nazwa,' ',miasto) SEPARATOR '|')
+
+Warunki dla funkcji agregujących
+
+Warunki dla funkcji agregujących nie występują po WHERE czyli taki warunek jest nieprawidłowy
+
+
+SELECT CONCAT(nazwa,' ',miasto),COUNT(*) FROM kluby INNER JOIN zawklub ON kluby.idklub=zawklub.IdKlubu INNER JOIN zawodnicy ON zawklub.IdZaw=zawodnicy.IdZaw WHERE DataZak IS NULL AND COUNT(*)>20 GROUP BY idklub ;
+
+warunki dla funkcji agregujących stawiamy po klauzuli HAVING , która występuje po instrukcji GROUP BY
+ 
+SELECT CONCAT(nazwa,' ',miasto),COUNT(*) FROM kluby INNER JOIN zawklub ON kluby.idklub=zawklub.IdKlubu INNER JOIN zawodnicy ON zawklub.IdZaw=zawodnicy.IdZaw WHERE DataZak IS NULL GROUP BY idklub HAVING  COUNT(*)>20 ;
+
+
+Warunki które nie zawierają funkcji agregującej mogą też być użyte po klauzuli HAVING.
+
+SELECT CONCAT(nazwa,' ',miasto),COUNT(*) FROM kluby INNER JOIN zawklub ON kluby.idklub=zawklub.IdKlubu INNER JOIN zawodnicy ON zawklub.IdZaw=zawodnicy.IdZaw WHERE DataZak IS NULL GROUP BY idklub HAVING  COUNT(*)>20 AND DataZak IS NULL;
+
+To zapytanie też jest poprawne.
+
+INSERT (powrót)
+
+Instrukcja INSERT pozwala przepisać dane z tabeli do tabeli
+
+INSERT INTO Tabela1(kol1,kol2,...)
+SELECT kolA,kolB,... FROM tabela2 [WHERE]
+
+Utworzymy tabelę z zakończonymi kontraktami (historyczne dane)
+
+CREATE TABLE ZakonczoneKontrakty(IdZaw INT(5),IdKlubu INT(4),DataRozp DATE,DataZak DATE);
+
+Przepisuję dane z tabeli ZawKlub do tabeli ZakonczoneKontrakty
+
+INSERT INTO ZakonczoneKontrakty (IdZaw,IdKlubu,DataRozp,DataZak) SELECT IdZaw,IdKlubu,DataRozp,DataZak FROM ZawKlub DataZak IS NOT NULL;
+
+Usuwanie danych z tabeli  (wymagana ostrożność! Usuniętych danych nie da się przywrócić)
+
+DELETE FROM Tabela WHERE warunek;
+
+PRZYKŁAD
+
+Usuwamy dane z tabeli ZawKlub które zostały przeniesione do tabeli  ZakonczoneKontrakty
+
+DELETE FROM ZawKlub WHERE DataZak IS NOT NULL;
+
+
+Modyfikacja danych w tabeli.
+
+Modyfikację danych w tabeli wykonujemy instrukcja UPDATE
+
+UPDATE Tabela SET kol1=wyr1,kol2=wyr2, …
+WHERE warunek
+
+PRZYKLAD
+
+Załózmy że w tabeli mecze wpisane są daty oraz IdGosp,IdGosc a nie są wpisane wyniki.
+(taka sytuacja jest możliwa gdyż daty meczów oraz kto jest gospodarzem i gościem w meczu są znane od początku sezonu. Wynik  natomiast nie jest znany 
+Po zakończonym meczu należy wpisać wynik
+
+UPDATE mecze SET GoleGosp=3,GoleGosc=2,frekwencja=20098 WHERE IdGosp=6 AND IdGosc=8 AND DataMeczu='2013-02-09';
+
+
+Łączenie zapytań
+
+Przy pomocy instrukcji UNION można połączyć wyniki dwóch (lub więcej) zapytań w jeden wynik. Wynik można uporządkować wg jednego kryterium.
+
+SELECT …
+
+UNION
+
+SELECT …
+
+
+ORDER BY kol
+
+Liczba kolumn po SELECT w obu zapytaniach wchodzących w skład UNION powinna być taka sama, przy czym kolumny w drugim (ewentualnie następnych) SELECT powinny odpowiadać kolumnom z pierwszego SELECT, tzn. np. jeżeli pierwszą kolumną po pierwszym SELECT jest nazwisko to po Drugim SELECT pierwszą kolumną też powinno być nazwisko lub wyrażenie które   ma w drugiej tabeli podobne znaczenie.
+
+np.
+SELECT CONCAT(imiona,' ',nazwisko),pesel FROM klienciInd
+UNION
+SELECT nazwa,regon FROM klienciInstyt
+
+Nazwa kolumny brana jest w wyniku z pierwszego SELECT można więc wstawić alias który będzie odpowiadał kolumnom z obu SELECT
+
+np.
+SELECT CONCAT(imiona,' ',nazwisko) AS 'klient',pesel AS 'regon/pesel' FROM klienciInd
+UNION
+SELECT nazwa,regon FROM klienciInstyt
+ORDER BY klient;
